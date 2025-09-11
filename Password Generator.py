@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, scrolledtext
 import random
 import string
 
@@ -7,172 +7,254 @@ class PasswordGenerator:
     def __init__(self, root):
         self.root = root
         self.root.title("Password Generator")
-        self.root.geometry("500x450")
-        self.root.configure(bg='#f5f5f5')
+        self.root.geometry("500x500")
         self.root.resizable(False, False)
+        self.root.configure(bg='#f0f0f0')
         
-        # Initialize variables
+        # Variables
         self.password_length = tk.IntVar(value=12)
         self.include_uppercase = tk.BooleanVar(value=True)
         self.include_lowercase = tk.BooleanVar(value=True)
         self.include_digits = tk.BooleanVar(value=True)
-        self.include_symbols = tk.BooleanVar(value=True)
-        self.generated_password = tk.StringVar(value="Click 'Generate Password' to create a password")
+        self.include_special = tk.BooleanVar(value=True)
         
-        # Setup the UI
-        self.setup_ui()
+        # Create UI
+        self.create_widgets()
         
-    def setup_ui(self):
-        # Main frame
-        main_frame = tk.Frame(self.root, bg='#f5f5f5', padx=20, pady=20)
-        main_frame.pack(fill='both', expand=True)
-        
+    def create_widgets(self):
         # Title
-        title_label = tk.Label(main_frame, text="Password Generator", 
-                              font=('Arial', 18, 'bold'), bg='#f5f5f5', fg='#2c3e50')
-        title_label.pack(pady=(0, 20))
+        title_label = tk.Label(
+            self.root, 
+            text="Password Generator", 
+            font=('Arial', 18, 'bold'),
+            bg='#f0f0f0',
+            fg='#2c3e50'
+        )
+        title_label.pack(pady=15)
         
-        # Length control frame
-        length_frame = tk.Frame(main_frame, bg='#f5f5f5')
-        length_frame.pack(fill='x', pady=(0, 15))
+        # Length selection frame
+        length_frame = tk.Frame(self.root, bg='#f0f0f0')
+        length_frame.pack(pady=10, padx=20, fill="x")
         
-        tk.Label(length_frame, text="Password Length:", font=('Arial', 12), 
-                bg='#f5f5f5').pack(side='left')
+        length_label = tk.Label(
+            length_frame, 
+            text="Password Length:", 
+            font=('Arial', 12),
+            bg='#f0f0f0'
+        )
+        length_label.pack(side=tk.LEFT)
         
-        length_scale = tk.Scale(length_frame, from_=6, to=32, orient=tk.HORIZONTAL,
-                               variable=self.password_length, bg='#f5f5f5',
-                               font=('Arial', 10), length=250, showvalue=True)
-        length_scale.pack(side='right', padx=(20, 0))
+        length_scale = tk.Scale(
+            length_frame,
+            from_=6,
+            to=30,
+            orient=tk.HORIZONTAL,
+            variable=self.password_length,
+            bg='#f0f0f0',
+            highlightthickness=0
+        )
+        length_scale.pack(side=tk.RIGHT, fill="x", expand=True)
         
-        # Character sets frame
-        sets_frame = tk.LabelFrame(main_frame, text="Character Sets", font=('Arial', 12, 'bold'),
-                                  bg='#f5f5f5', padx=10, pady=10)
-        sets_frame.pack(fill='x', pady=(0, 15))
+        # Complexity options frame
+        options_frame = tk.LabelFrame(
+            self.root, 
+            text="Password Complexity",
+            font=('Arial', 12, 'bold'),
+            bg='#f0f0f0',
+            padx=10,
+            pady=10
+        )
+        options_frame.pack(pady=10, padx=20, fill="x")
         
-        # Checkboxes for character sets
-        tk.Checkbutton(sets_frame, text="Uppercase Letters (A-Z)", variable=self.include_uppercase,
-                      font=('Arial', 10), bg='#f5f5f5').pack(anchor='w')
-        tk.Checkbutton(sets_frame, text="Lowercase Letters (a-z)", variable=self.include_lowercase,
-                      font=('Arial', 10), bg='#f5f5f5').pack(anchor='w')
-        tk.Checkbutton(sets_frame, text="Digits (0-9)", variable=self.include_digits,
-                      font=('Arial', 10), bg='#f5f5f5').pack(anchor='w')
-        tk.Checkbutton(sets_frame, text="Symbols (!@#$%^&*)", variable=self.include_symbols,
-                      font=('Arial', 10), bg='#f5f5f5').pack(anchor='w')
+        tk.Checkbutton(
+            options_frame, 
+            text="Uppercase Letters (A-Z)", 
+            variable=self.include_uppercase,
+            font=('Arial', 10),
+            bg='#f0f0f0',
+            activebackground='#f0f0f0'
+        ).pack(anchor="w", pady=2)
+        
+        tk.Checkbutton(
+            options_frame, 
+            text="Lowercase Letters (a-z)", 
+            variable=self.include_lowercase,
+            font=('Arial', 10),
+            bg='#f0f0f0',
+            activebackground='#f0f0f0'
+        ).pack(anchor="w", pady=2)
+        
+        tk.Checkbutton(
+            options_frame, 
+            text="Digits (0-9)", 
+            variable=self.include_digits,
+            font=('Arial', 10),
+            bg='#f0f0f0',
+            activebackground='#f0f0f0'
+        ).pack(anchor="w", pady=2)
+        
+        tk.Checkbutton(
+            options_frame, 
+            text="Special Characters (!@#$%^&*)", 
+            variable=self.include_special,
+            font=('Arial', 10),
+            bg='#f0f0f0',
+            activebackground='#f0f0f0'
+        ).pack(anchor="w", pady=2)
         
         # Generate button
-        generate_btn = tk.Button(main_frame, text="Generate Password", command=self.generate_password,
-                                bg='#3498db', fg='white', font=('Arial', 12, 'bold'),
-                                padx=20, pady=8, relief='raised', bd=2)
+        generate_btn = tk.Button(
+            self.root,
+            text="Generate Password",
+            command=self.generate_password,
+            font=('Arial', 12, 'bold'),
+            bg='#3498db',
+            fg='white',
+            padx=20,
+            pady=8,
+            cursor='hand2'
+        )
         generate_btn.pack(pady=15)
         
-        # Generated password frame
-        password_frame = tk.Frame(main_frame, bg='#f5f5f5')
-        password_frame.pack(fill='x', pady=(0, 15))
+        # Generated password display
+        result_frame = tk.LabelFrame(
+            self.root, 
+            text="Generated Password",
+            font=('Arial', 12, 'bold'),
+            bg='#f0f0f0',
+            padx=10,
+            pady=10
+        )
+        result_frame.pack(pady=10, padx=20, fill="both", expand=True)
         
-        tk.Label(password_frame, text="Generated Password:", font=('Arial', 12), 
-                bg='#f5f5f5').pack(anchor='w')
-        
-        password_entry = tk.Entry(password_frame, textvariable=self.generated_password, 
-                                 font=('Courier', 12), state='readonly', 
-                                 readonlybackground='white', fg='#2c3e50', relief='sunken', bd=2)
-        password_entry.pack(fill='x', pady=5, ipady=5)
+        # Scrollable text area for password
+        self.password_display = scrolledtext.ScrolledText(
+            result_frame,
+            height=4,
+            width=50,
+            font=('Courier', 12),
+            wrap=tk.WORD,
+            padx=10,
+            pady=10
+        )
+        self.password_display.pack(fill="both", expand=True)
+        self.password_display.config(state=tk.DISABLED)
         
         # Copy button
-        copy_btn = tk.Button(main_frame, text="Copy to Clipboard", command=self.copy_to_clipboard,
-                            bg='#2ecc71', fg='white', font=('Arial', 10),
-                            padx=15, pady=5, relief='raised', bd=2)
-        copy_btn.pack(pady=5)
+        copy_btn = tk.Button(
+            self.root,
+            text="Copy to Clipboard",
+            command=self.copy_to_clipboard,
+            font=('Arial', 10),
+            bg='#2ecc71',
+            fg='white',
+            padx=15,
+            pady=5
+        )
+        copy_btn.pack(pady=10)
         
         # Strength indicator
-        self.strength_var = tk.StringVar(value="Password strength will appear here")
-        strength_label = tk.Label(main_frame, textvariable=self.strength_var, 
-                                 font=('Arial', 10), bg='#f5f5f5', fg='#7f8c8d')
-        strength_label.pack(pady=5)
+        self.strength_label = tk.Label(
+            self.root,
+            text="Password Strength: Not Generated",
+            font=('Arial', 10),
+            bg='#f0f0f0',
+            fg='#7f8c8d'
+        )
+        self.strength_label.pack(pady=5)
         
-        # Footer
-        footer_label = tk.Label(main_frame, text="© 2023 Password Generator", 
-                               font=('Arial', 8), bg='#f5f5f5', fg='#95a5a6')
-        footer_label.pack(side='bottom', pady=(20, 0))
-    
     def generate_password(self):
         # Check if at least one character set is selected
         if not (self.include_uppercase.get() or self.include_lowercase.get() or 
-                self.include_digits.get() or self.include_symbols.get()):
-            messagebox.showwarning("Warning", "Please select at least one character set!")
+                self.include_digits.get() or self.include_special.get()):
+            messagebox.showerror("Error", "Please select at least one character type!")
             return
         
         # Define character sets
-        char_pool = ""
+        char_sets = []
         if self.include_uppercase.get():
-            char_pool += string.ascii_uppercase
+            char_sets.append(string.ascii_uppercase)
         if self.include_lowercase.get():
-            char_pool += string.ascii_lowercase
+            char_sets.append(string.ascii_lowercase)
         if self.include_digits.get():
-            char_pool += string.digits
-        if self.include_symbols.get():
-            char_pool += "!@#$%^&*"
+            char_sets.append(string.digits)
+        if self.include_special.get():
+            char_sets.append("!@#$%^&*")
         
-        # Generate password
-        length = self.password_length.get()
-        password = ''.join(random.choice(char_pool) for _ in range(length))
+        # Ensure we have at least one character from each selected set
+        password = []
+        for char_set in char_sets:
+            password.append(random.choice(char_set))
         
-        # Update the password display
-        self.generated_password.set(password)
+        # Fill the rest of the password with random characters from all selected sets
+        all_chars = ''.join(char_sets)
+        for _ in range(self.password_length.get() - len(password)):
+            password.append(random.choice(all_chars))
+        
+        # Shuffle the password
+        random.shuffle(password)
+        password = ''.join(password)
+        
+        # Display the password
+        self.password_display.config(state=tk.NORMAL)
+        self.password_display.delete(1.0, tk.END)
+        self.password_display.insert(tk.END, password)
+        self.password_display.config(state=tk.DISABLED)
         
         # Update strength indicator
         self.update_strength_indicator(password)
-        
-        # Show success message
-        messagebox.showinfo("Success", "Password generated successfully!")
     
     def update_strength_indicator(self, password):
-        # Simple password strength estimation
+        # Simple password strength calculation
+        strength = 0
         length = len(password)
-        has_upper = any(c.isupper() for c in password)
-        has_lower = any(c.islower() for c in password)
-        has_digit = any(c.isdigit() for c in password)
-        has_symbol = any(not c.isalnum() for c in password)
         
-        # Calculate strength score
-        score = 0
+        # Length factor
         if length >= 12:
-            score += 2
+            strength += 2
         elif length >= 8:
-            score += 1
+            strength += 1
             
-        if has_upper:
-            score += 1
-        if has_lower:
-            score += 1
-        if has_digit:
-            score += 1
-        if has_symbol:
-            score += 1
+        # Character diversity factor
+        has_upper = any(c in string.ascii_uppercase for c in password)
+        has_lower = any(c in string.ascii_lowercase for c in password)
+        has_digit = any(c in string.digits for c in password)
+        has_special = any(c in "!@#$%^&*" for c in password)
+        
+        diversity = sum([has_upper, has_lower, has_digit, has_special])
+        strength += diversity
         
         # Set strength text and color
-        if score >= 6:
-            self.strength_var.set("Very Strong (Excellent password)")
-        elif score >= 5:
-            self.strength_var.set("Strong (Good password)")
-        elif score >= 4:
-            self.strength_var.set("Medium (Adequate password)")
-        elif score >= 3:
-            self.strength_var.set("Weak (Consider improving)")
+        if strength >= 5:
+            text = "Password Strength: Very Strong"
+            color = "#27ae60"
+        elif strength >= 4:
+            text = "Password Strength: Strong"
+            color = "#2ecc71"
+        elif strength >= 3:
+            text = "Password Strength: Medium"
+            color = "#f39c12"
         else:
-            self.strength_var.set("Very Weak (Not recommended)")
+            text = "Password Strength: Weak"
+            color = "#e74c3c"
+            
+        self.strength_label.config(text=text, fg=color)
     
     def copy_to_clipboard(self):
-        password = self.generated_password.get()
-        if password and password != "Click 'Generate Password' to create a password":
-            # For copying to clipboard without pyperclip
-            self.root.clipboard_clear()
-            self.root.clipboard_append(password)
-            self.root.update()  # Now it stays on the clipboard after the window is closed
+        password = self.password_display.get(1.0, tk.END).strip()
+        if password:
+            # Create a temporary widget to copy to clipboard
+            temp = tk.Tk()
+            temp.withdraw()
+            temp.clipboard_clear()
+            temp.clipboard_append(password)
+            temp.update()
+            temp.destroy()
+            
             messagebox.showinfo("Success", "Password copied to clipboard!")
         else:
             messagebox.showwarning("Warning", "No password to copy!")
 
-# Create and run the application
 if __name__ == "__main__":
     root = tk.Tk()
     app = PasswordGenerator(root)
